@@ -159,7 +159,32 @@ const update = account => {
   calcDisplaySummary(enteredUser.movements);
 };
 
-let enteredUser;
+const startTimer = function(){
+  const tick = function(){
+    let min = String(Math.trunc(time/60)).padStart(2,0);
+    let secs = String(time%60).padStart(2,0);
+  
+    labelTimer.textContent = `${min}:${secs}`;
+    time--;
+    if(time == 0){
+      clearTimeout(timer);
+      labelWelcome.textContent = `Log in to get started`;
+      containerApp.style.opacity=0;
+    }
+
+    
+  };
+ 
+  let time = 300;
+  //deducting 1 sec every 1 sec
+  tick();
+  const timer = setInterval(tick,1000)
+
+
+  return timer;
+}
+
+let enteredUser,timer;
 //login button
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
@@ -178,13 +203,18 @@ btnLogin.addEventListener('click', function (e) {
     }`;
     inputLoginUsername.value = inputLoginPin.value = '';
 
+    if(timer) clearTimeout(timer);
+    timer = startTimer();
     update(enteredUser);
+
   }
 });
 
 btnTransfer.addEventListener('click', function (e) {
   console.log(`clicked`);
   e.preventDefault();
+  if(timer) clearTimeout(timer);
+    timer = startTimer();
   const amount = Number(inputTransferAmount.value);
   console.log(amount);
 
@@ -206,12 +236,14 @@ btnTransfer.addEventListener('click', function (e) {
     transferTo.movementsDates.push(new Date());
     transferTo.movements.push(amount);
 
+
     update(enteredUser.movements);
   }
 });
 
 btnClose.addEventListener('click', function (e) {
   e.preventDefault();
+  
   console.log('delete');
   const closingUser = inputCloseUsername.value;
   const closingPin = Number(inputClosePin.value);
@@ -229,13 +261,18 @@ btnClose.addEventListener('click', function (e) {
 //Loan button
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
+  if(timer) clearTimeout(timer);
+    timer = startTimer();
   const requestedLoan = Number(inputLoanAmount.value);
   const minDeposit = 0.1 * requestedLoan;
   if (enteredUser.movements.some(mov => mov >= minDeposit)) {
-    enteredUser.movements.push(requestedLoan);
-    enteredUser.movementsDates.push(new Date());
-  }
-  update(enteredUser.movements);
+  setTimeout(function(){ 
+      enteredUser.movements.push(requestedLoan);
+      enteredUser.movementsDates.push(new Date());
+      update(enteredUser.movements);
+  },5000);
+}
+ 
 });
 
 const currencies = new Map([
@@ -268,3 +305,6 @@ btnSort.addEventListener('click', function (e) {
   transaction(enteredUser.movements, !sort);
   sort = !sort;
 });
+
+setTimeout(() => console.log(`heres is your pizza! 🍕`), 3000);
+
